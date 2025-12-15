@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ELIEVE Christmas Spin & Win</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎄</text></svg>">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #8b0000 0%, #400000 100%);
+    color: white;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 20px;
+  }
+
+  .snowflake {
+    position: fixed;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    user-select: none;
+    pointer-events: none;
+    animation: fall linear forwards;
+    opacity: 0.8;
+    z-index: 1000;
+  }
+  
+  @keyframes fall {
+    to { transform: translateY(100vh); }
+  }
+
+  .container {
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-top: 20px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: gold;
+  }
+
+  .notice {
+    background: #ffcc00;
+    color: #000;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 14px;
+    display: none;
+    border: 2px solid #ff9900;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid gold;
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  input:focus {
+    outline: none;
+    box-shadow: 0 0 10px gold;
+  }
+
+  .spin-btn {
+    background: linear-gradient(to bottom, #ffd700, #ff9900);
+    color: #8b0000;
+    border: none;
+    padding: 18px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    width: 100%;
+    cursor: pointer;
+    margin: 25px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .spin-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .spin-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .wheel-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 30px auto;
+  }
+
+  #wheelCanvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 8px solid gold;
+    box-shadow: 0 0 30px rgba(255,215,0,0.5);
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 1);
+  }
+
+  .pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 35px solid gold;
+    z-index: 10;
+    filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5));
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background: white;
+    color: #333;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    border: 5px solid gold;
+    animation: modalAppear 0.3s ease-out;
+  }
+
+  @keyframes modalAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .modal h2 {
+    color: #8b0000;
+    margin-bottom: 15px;
+  }
+
+  .coupon-code {
+    display: block;
+    background: #f8f8f8;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px 0;
+    border: 3px dashed #8b0000;
+    border-radius: 10px;
+    color: #333;
+  }
+
+  .modal-btn {
+    background: #8b0000;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+
+  .logo {
+    text-align: center;
+    font-size: 14px;
+    color: gold;
+    margin-top: 30px;
+    opacity: 0.8;
+  }
+
+  .instructions {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="snowContainer"></div>
+
+<div class="container">
+  <div class="header">
+    <h1>🎄 ELIEVE Christmas Spin & Win 🎄</h1>
+    <div id="browserWarning" class="notice">
+      <strong>⚠️ Important:</strong> If you're in WhatsApp, tap <b>⋮</b> then <b>"Open in Browser"</b> to play properly!
+    </div>
+  </div>
+
+  <div class="instructions">
+    <p>Fill your details and spin to win amazing Christmas offers!</p>
+  </div>
+
+  <div class="form-group">
+    <input type="text" id="userName" placeholder="Your Full Name" required>
+    <input type="email" id="userEmail" placeholder="Email Address" required>
+    <input type="tel" id="userPhone" placeholder="WhatsApp Number" required>
+  </div>
+
+  <button class="spin-btn" onclick="startSpin()" id="spinButton">🎯 SPIN THE WHEEL 🎯</button>
+
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <canvas id="wheelCanvas"></canvas>
+  </div>
+
+  <div class="logo">
+    ELIEVE Christmas Special 2024
+  </div>
+</div>
+
+<div id="resultModal" class="modal">
+  <div class="modal-content">
+    <h2>🎉 Congratulations! 🎉</h2>
+    <p>You've won:</p>
+    <p id="winningPrize" style="font-size: 20px; font-weight: bold; color: #8b0000; margin: 15px 0;"></p>
+    <p>Your coupon code:</p>
+    <span id="couponCode" class="coupon-code"></span>
+    <p style="font-size: 14px; color: #666; margin: 10px 0;">Show this code at ELIEVE to redeem your offer</p>
+    <button class="modal-btn" onclick="closeModal()">GOT IT!</button>
+  </div>
+</div>
+
+<script>
+// Configuration
+const prizes = [
+  { name: "AVL Mani-Pedi + Gel", weight: 4 },
+  { name: "Gemology Clean Up", weight: 4 },
+  { name: "Head / Foot Massage", weight: 5 },
+  { name: "Slimming @ ₹999", weight: 3 },
+  { name: "Harmony Q Switch 25% OFF", weight: 2 },
+  { name: "Global Hair Colour 25% OFF", weight: 2 },
+  { name: "Remy Laure Facial 30% OFF", weight: 1 },
+  { name: "Kanpeki Facial 25% OFF", weight: 2 },
+  { name: "Repechage Facial 10% OFF", weight: 3 },
+  { name: "PHYTOMER BOGO", weight: 1 },
+  { name: "BioTop & Kerastase 30% OFF", weight: 1 },
+  { name: "Kaneki Facial 35% OFF", weight: 1 }
+];
+
+// YOUR GOOGLE SHEETS URL (UNCHANGED)
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwx65YpEkPX_iQdGNPqg4-cmAEAKqc6g4E49pGeNb8Y0EtSmNRGP1BPM0vZG9ERbZU7zQ/exec";
+
+// Variables
+let isSpinning = false;
+let currentRotation = 0;
+
+// Initialize
+window.addEventListener('DOMContentLoaded', function() {
+  // Check if in WhatsApp/Facebook in-app browser
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  if (/FBAN|FBAV|Instagram|WhatsApp/.test(userAgent)) {
+    document.getElementById('browserWarning').style.display = 'block';
+  }
+  
+  createSnowflakes();
+  drawWheel();
+});
+
+// Create snowflakes
+function createSnowflakes() {
+  const container = document.getElementById('snowContainer');
+  const flakeCount = 40;
+  
+  for (let i = 0; i < flakeCount; i++) {
+    const flake = document.createElement('div');
+    flake.innerHTML = '❄';
+    flake.className = 'snowflake';
+    
+    // Random properties
+    flake.style.left = Math.random() * 100 + 'vw';
+    flake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+    flake.style.opacity = Math.random() * 0.6 + 0.3;
+    flake.style.fontSize = (Math.random() * 15 + 10) + 'px';
+    flake.style.animationDelay = Math.random() * 5 + 's';
+    
+    container.appendChild(flake);
+  }
+}
+
+// Draw the wheel
+function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const size = 320;
+  const center = size / 2;
+  const radius = center - 5;
+  
+  // Set canvas dimensions
+  canvas.width = size;
+  canvas.height = size;
+  
+  // Draw each segment
+  const angle = (2 * Math.PI) / prizes.length;
+  
+  prizes.forEach((prize, index) => {
+    const startAngle = index * angle;
+    const endAngle = startAngle + angle;
+    
+    // Draw segment
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, startAngle, endAngle);
+    ctx.closePath();
+    
+    // Alternating colors
+    ctx.fillStyle = index % 2 === 0 ? '#b30000' : '#006400';
+    ctx.fill();
+    
+    // Segment border
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Draw prize text
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(startAngle + angle / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(prize.name, radius - 20, 5);
+    ctx.restore();
+  });
+}
+
+// Start spinning
+function startSpin() {
+  if (isSpinning) return;
+  
+  const name = document.getElementById('userName').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
+  const phone = document.getElementById('userPhone').value.trim();
+  
+  // Validate inputs
+  if (!name || !email || !phone) {
+    alert('Please fill in all fields before spinning!');
+    return;
+  }
+  
+  // Validate phone number (basic)
+  if (phone.length < 10) {
+    alert('Please enter a valid WhatsApp number');
+    return;
+  }
+  
+  // Check if already played
+  if (localStorage.getItem('elieve_played_' + phone)) {
+    alert('You have already spun the wheel! Each number can only play once. 🎄');
+    return;
+  }
+  
+  // Disable spin button
+  isSpinning = true;
+  document.getElementById('spinButton').disabled = true;
+  document.getElementById('spinButton').textContent = 'SPINNING...';
+  
+  // Select random prize (weighted)
+  const prizePool = [];
+  prizes.forEach(prize => {
+    for (let i = 0; i < prize.weight; i++) {
+      prizePool.push(prize);
+    }
+  });
+  
+  const selectedPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
+  const prizeIndex = prizes.findIndex(p => p.name === selectedPrize.name);
+  
+  // Calculate rotation (5 full spins + prize position)
+  const segmentAngle = 360 / prizes.length;
+  const targetRotation = 1800 + (360 - (prizeIndex * segmentAngle + segmentAngle / 2));
+  
+  // Apply rotation
+  const wheel = document.getElementById('wheelCanvas');
+  currentRotation += targetRotation;
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+  
+  // Generate coupon code
+  const couponCode = 'ELIEVE-' + Date.now().toString(36).toUpperCase().slice(-6);
+  
+  // Show result after spin completes
+  setTimeout(() => {
+    document.getElementById('winningPrize').textContent = selectedPrize.name;
+    document.getElementById('couponCode').textContent = couponCode;
+    document.getElementById('resultModal').style.display = 'flex';
+    
+    // Mark as played
+    localStorage.setItem('elieve_played_' + phone, 'true');
+    
+    // Send data to Google Sheets
+    sendToGoogleSheets(name, email, phone, selectedPrize.name, couponCode);
+    
+    // Re-enable button (for page reload)
+    isSpinning = false;
+    document.getElementById('spinButton').disabled = false;
+    document.getElementById('spinButton').textContent = '🎯 SPIN THE WHEEL 🎯';
+  }, 4500);
+}
+
+// Send data to Google Sheets
+function sendToGoogleSheets(name, email, phone, prize, coupon) {
+  const data = {
+    timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    name: name,
+    email: email,
+    phone: phone,
+    prize: prize,
+    coupon: coupon
+  };
+  
+  // Create form data
+  const formData = new URLSearchParams();
+  Object.keys(data).forEach(key => {
+    formData.append(key, data[key]);
+  });
+  
+  // Send to Google Sheets (using GET method for no-cors)
+  fetch(GOOGLE_SHEET_URL + '?' + formData.toString(), {
+    method: 'GET',
+    mode: 'no-cors'
+  }).then(() => {
+    console.log('Data sent to Google Sheets');
+  }).catch(err => {
+    console.log('Sheet submission completed');
+  });
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById('resultModal').style.display = 'none';
+  
+  // Optional: Refresh form
+  document.getElementById('userName').value = '';
+  document.getElementById('userEmail').value = '';
+  document.getElementById('userPhone').value = '';
+}
+
+// Handle Enter key in form
+document.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    startSpin();
+  }
+});
+</script>
+</body>
+</html>
